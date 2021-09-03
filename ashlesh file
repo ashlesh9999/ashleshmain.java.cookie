@@ -1,0 +1,146 @@
+public class FireAgency {
+    private String fire;
+    private List<Incident> incidents = new ArrayList<>();
+
+    public void addObserver(Incident incident) {
+        this.incidents.add(incident);
+    }
+
+    public void removeObserver(Incident incident) {
+        this.incidents.remove(incident);
+    }
+
+    public void setFire(String fire) {
+        this.fire = fire;
+        for (Incident incident : this.incidents) {
+            incident.update(this.fire);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+public class FireIncident implements Incident {
+    private String fire;
+
+    @Override
+    public void update(Object fire) {
+        this.setFire((String) fire);
+    } 
+}
+
+
+
+
+
+
+public interface Incident {
+    public void update(Object o);
+}
+
+
+
+
+
+
+FireAgency observable = new FireAgency();
+FireIncident observer = new FireIncident();
+
+observable.addObserver(observer);
+observable.setFire("fire");
+assertEquals(observer.getFire(), "fire");
+
+
+
+
+
+
+public class OFireincident implements Observer {
+
+    private String fire;
+
+    @Override
+    public void update(Observable o, Object fire) {
+        this.setFire((String) fire);
+    }
+}
+
+
+
+
+public class OFireAgency extends Observable {
+    private String fire;
+
+    public void setfire(String fire) {
+        this.fire = fire;
+        setChanged();
+        notifyObservers(fire);
+    }
+}
+
+
+
+
+
+OFireAgency observable = new OFireAgency();
+OFireIncident observer = new OFireIncident();
+
+observable.addObserver(observer);
+observable.setFire("fire");
+assertEquals(observer.getFire(), "fire");
+
+
+
+public class PCLFireAgency {
+    private String fire;
+
+    private PropertyChangeSupport support;
+
+    public PCLFireAgency() {
+        support = new PropertyChangeSupport(this);
+    }
+
+    public void addPropertyChangeListener(PropertyChangeListener pcl) {
+        support.addPropertyChangeListener(pcl);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener pcl) {
+        support.removePropertyChangeListener(pcl);
+    }
+
+    public void setFire(String value) {
+        support.firesPropertyChange("fire", this.fire, value);
+        this.fire = value;
+    }
+}
+
+
+
+support.firesPropertyChange("fire", this.fire, value);
+
+
+
+
+public class PCLFireIncident implements PropertyChangeListener {
+
+    private String fire;
+
+    public void propertyChange(PropertyChangeEvent evt) {
+        this.setFire((String) evt.getNewValue());
+    }
+}
+
+
+PCLFireAgency observable = new PCLFireAgency();
+PCLFireIncident observer = new PCLFireIncident();
+
+observable.addPropertyChangeListener(observer);
+observable.setFire("fire");
+
+assertEquals(observer.getFire(), "fire");
